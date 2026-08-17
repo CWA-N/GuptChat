@@ -1,0 +1,425 @@
+@import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap");
+
+:root {
+  --bg-color: #0d1117;
+  --panel-bg: #161b22;
+  --border-color: #30363d;
+  --text-main: #c9d1d9;
+  --text-muted: #8b949e;
+  --cyan: #00f0ff;
+  --cyan-glow: rgba(0, 240, 255, 0.2);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: "JetBrains Mono", monospace;
+}
+
+/* FIX: Changed 100vh to 100dvh for mobile address bar fix */
+body {
+  background-color: var(--bg-color);
+  color: var(--text-main);
+  height: 100vh; /* Fallback */
+  height: 100dvh;
+  overflow: hidden;
+  background-image:
+    linear-gradient(var(--border-color) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border-color) 1px, transparent 1px);
+  background-size: 50px 50px;
+}
+
+.hidden {
+  display: none !important;
+}
+.screen {
+  width: 100%;
+  height: 100%;
+  display: flex;
+}
+
+/* --- Login Box --- */
+#login-screen {
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+.login-box {
+  background-color: var(--panel-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 30px;
+  width: 100%;
+  max-width: 450px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+.login-box h1 {
+  color: #fff;
+  margin-bottom: 10px;
+  font-size: 1.8rem;
+}
+.login-box h1 span,
+.logo span {
+  color: var(--cyan);
+}
+.subtitle {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  margin-bottom: 25px;
+}
+.form-group {
+  margin-bottom: 20px;
+}
+.form-group label {
+  display: block;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+input[type="text"] {
+  width: 100%;
+  padding: 12px;
+  background-color: var(--bg-color);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  border-radius: 6px;
+  outline: none;
+}
+input[type="text"]:focus {
+  border-color: var(--cyan);
+  box-shadow: 0 0 5px var(--cyan-glow);
+}
+.btn {
+  width: 100%;
+  padding: 15px;
+  background-color: var(--cyan);
+  color: #000;
+  border: none;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 0 15px var(--cyan-glow);
+}
+
+/* --- Chat Layout --- */
+.sidebar {
+  width: 280px;
+  background-color: var(--panel-bg);
+  border-right: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+}
+.sidebar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+.sidebar-content {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+.mobile-only {
+  display: none;
+}
+.logo {
+  font-size: 1.5rem;
+}
+
+.panel {
+  background-color: var(--bg-color);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 20px;
+}
+.panel h3 {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-bottom: 10px;
+}
+.highlight {
+  color: var(--cyan);
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+.dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  background-color: #2ea043;
+  border-radius: 50%;
+  margin-right: 5px;
+}
+.members ul {
+  list-style: none;
+  overflow-y: auto;
+  max-height: 150px;
+}
+.members li {
+  font-size: 0.9rem;
+  margin-bottom: 10px;
+}
+
+.btn-outline {
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 8px 12px;
+  cursor: pointer;
+}
+.btn-outline:hover {
+  color: #fff;
+  border-color: #fff;
+}
+.small-btn {
+  padding: 5px 10px;
+  font-size: 0.8rem;
+  margin-right: 10px;
+}
+
+.chat-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--bg-color);
+  min-height: 0;
+}
+.chat-header {
+  padding: 15px 20px;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.user-badge {
+  border: 1px solid var(--border-color);
+  padding: 5px 15px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+}
+
+.chat-messages {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+}
+.system-msg {
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  margin-bottom: 20px;
+}
+.message {
+  margin-bottom: 15px;
+  max-width: 85%;
+}
+.message .meta {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-bottom: 5px;
+}
+.message .meta span {
+  color: var(--cyan);
+  font-weight: bold;
+}
+.message .text {
+  background-color: var(--panel-bg);
+  padding: 10px 15px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  display: inline-block;
+  word-break: break-word;
+  line-height: 1.4;
+}
+.message img {
+  max-width: 100%;
+  max-height: 300px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  margin-top: 5px;
+}
+
+.chat-input-container {
+  padding: 15px 20px;
+  border-top: 1px solid var(--border-color);
+  background-color: var(--bg-color);
+}
+#chat-form {
+  display: flex;
+  align-items: center;
+  background-color: var(--bg-color);
+  border: 1px solid var(--cyan);
+  border-radius: 25px;
+  padding: 5px 10px;
+}
+/* === UNIQUE IMAGE ICON STYLING === */
+.icon-btn {
+  background: transparent;
+  border: 1px solid var(--border-color);
+  width: 35px;
+  height: 35px;
+  border-radius: 50%; /* Gol aakar */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  margin-right: 12px;
+  color: var(--text-muted);
+  transition: all 0.3s ease;
+}
+
+.icon-btn svg {
+  width: 18px;
+  height: 18px;
+  transition: transform 0.3s ease;
+}
+
+/* Jab mouse upar jaye toh Neon Glow kare */
+.icon-btn:hover {
+  border-color: var(--cyan);
+  color: var(--cyan);
+  background-color: rgba(0, 240, 255, 0.1);
+  box-shadow:
+    0 0 10px var(--cyan-glow),
+    inset 0 0 5px var(--cyan-glow);
+}
+
+.icon-btn:hover svg {
+  transform: scale(1.15) rotate(-5deg); /* Thoda bada aur tilt ho jaye */
+}
+#chat-form input[type="text"] {
+  flex: 1;
+  border: none;
+  background: transparent;
+  padding: 10px;
+  color: var(--text-main);
+  outline: none;
+  font-size: 1rem;
+}
+.send-btn {
+  background-color: var(--cyan);
+  color: #000;
+  border: none;
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 1.2rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+/* ========================================= */
+/* FIX: RESPONSIVE MEDIA QUERIES FOR MOBILE  */
+/* ========================================= */
+@media (max-width: 768px) {
+  .screen {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid var(--border-color);
+    padding: 15px;
+    height: auto;
+    flex-shrink: 0; /* Yeh line top header ko dabne nahi degi */
+  }
+
+  .sidebar-header {
+    margin-bottom: 0;
+  }
+  .mobile-only {
+    display: block;
+    font-size: 0.9rem;
+    font-weight: bold;
+  }
+
+  .sidebar-content {
+    display: none;
+    margin-top: 15px;
+  }
+  .sidebar-content.active {
+    display: flex;
+  }
+
+  .chat-header {
+    font-size: 0.85rem;
+    padding: 12px 15px;
+    flex-shrink: 0;
+  }
+  .small-btn {
+    margin-right: 5px;
+    padding: 5px 8px;
+  }
+  .user-badge {
+    padding: 5px 10px;
+  }
+
+  .chat-messages {
+    padding: 15px;
+  }
+
+  .chat-input-container {
+    padding: 10px; /* Mobile par input ka space adjust kiya gaya hai */
+    flex-shrink: 0;
+    padding-bottom: env(safe-area-inset-bottom, 10px); /* For iPhones */
+  }
+}
+
+/* === IMAGE PREVIEW MODAL STYLES === */
+.modal {
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.85); /* Dark transparent background */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  backdrop-filter: blur(5px);
+}
+
+.modal.hidden {
+  display: none !important;
+}
+
+.modal-content {
+  max-width: 90%;
+  max-height: 90%;
+  border-radius: 8px;
+  box-shadow: 0 0 20px var(--cyan-glow);
+  border: 2px solid var(--cyan);
+}
+
+.close-modal {
+  position: absolute;
+  top: 20px;
+  right: 30px;
+  color: #fff;
+  font-size: 40px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s;
+}
+.close-modal:hover {
+  color: var(--cyan);
+}
+
+/* Make chat images look clickable */
+.message img {
+  cursor: pointer;
+  transition: 0.2s;
+}
+.message img:hover {
+  opacity: 0.8;
+}
