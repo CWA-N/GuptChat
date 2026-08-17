@@ -41,6 +41,23 @@ io.on('connection', (socket) => {
         }
     });
 
+    // === YAHAN SE TYPING INDICATOR CODE ===
+    socket.on('typing', () => {
+        const user = users[socket.id];
+        if (user) {
+            // Jo type kar raha hai usko chhodkar, room ke baaki sabko bhejo
+            socket.broadcast.to(user.room).emit('typing', user.username);
+        }
+    });
+
+    socket.on('stopTyping', () => {
+        const user = users[socket.id];
+        if (user) {
+            socket.broadcast.to(user.room).emit('stopTyping');
+        }
+    });
+    // === YAHAN TAK ===
+
     // === YAHAN HAI GLOBAL CLEAR CHAT KA ASLI CODE ===
     socket.on('clearRoomChat', () => {
         const user = users[socket.id];
