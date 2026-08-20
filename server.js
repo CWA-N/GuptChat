@@ -93,7 +93,7 @@ io.on('connection', (socket) => {
 setInterval(() => {
 
     io.emit('chatCleared');
-}, 40000);
+}, 120000);
 
 
 const PORT = process.env.PORT || 3000;
