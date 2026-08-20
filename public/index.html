@@ -56,20 +56,28 @@
                 <div>ROOM // <span id="header-room-name" class="highlight">8080</span></div>
                 <div class="header-actions">
                     <!-- Naya Call Button upar Header mein -->
-                    <button id="callButton" class="btn-outline small-btn" style="border-color: #00f0ff; color: #0d0d0d;">📹 Call</button>
+                    <button id="callButton" class="btn-outline small-btn" style="border-color: #00f0ff; color: #00f0ff;">📹 Call</button>
                     
                     <button id="clear-chat-btn" class="btn-outline small-btn">🗑️ Clear</button>
                     <span id="current-username" class="user-badge">user</span>
                 </div>
             </header>
 
-            <!-- === VIDEO CALL SECTION (Ab ye default hidden rahega) === -->
-            <div id="video-container" class="hidden">
-                <video id="localVideo" autoplay muted style="width: 150px; border: 2px solid #4CAF50; border-radius: 8px;"></video>
-                <video id="remoteVideo" autoplay style="width: 150px; border: 2px solid #f44336; border-radius: 8px;"></video>
+            <!-- === VIDEO CALL SECTION (Group & Controls) === -->
+            <div id="video-container" class="hidden" style="flex-direction: column; background: rgba(0,0,0,0.5); padding: 15px; border-bottom: 1px solid #333;">
                 
-                <!-- Call kaatne ka naya button -->
-                <button id="endCallButton" class="btn" style="background: #f44336; color: white; margin-left: 10px; padding: 10px 15px; font-weight: bold;">End Call</button>
+                <!-- Group Videos yahan dikhenge -->
+                <div id="video-grid" style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-bottom: 10px;">
+                    <video id="localVideo" autoplay muted style="width: 150px; border: 2px solid #4CAF50; border-radius: 8px;"></video>
+                    <!-- Baaki doston ke videos yahan automatic add honge -->
+                </div>
+                
+                <!-- Naye Camera Controls -->
+                <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+                    <button id="toggleCamBtn" class="btn-outline small-btn">📹 Cam Off</button>
+                    <button id="flipCamBtn" class="btn-outline small-btn" style="color: #00f0ff; border-color: #00f0ff;">🔄 Flip Cam</button>
+                    <button id="endCallButton" class="btn" style="background: #f44336; color: white; padding: 8px 15px;">End Call</button>
+                </div>
             </div>
             <!-- ============================================================= -->
 

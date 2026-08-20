@@ -29,37 +29,35 @@ io.on('connection', (socket) => {
         });
     });
 
-    // === VIDEO CALL SIGNALING (Sirf Room Walon Ke Liye) ===
-    socket.on('offer', (data) => {
+    // === VIDEO CALL SIGNALING (GROUP MESH NETWORK) ===
+    socket.on('join-call', () => {
         const user = users[socket.id];
         if (user) {
-            // Signal sirf us user ke room mein jayega
-            socket.to(user.room).emit('offer', data); 
+            // Jab koi naya banda call start kare, room mein sabko batao
+            socket.to(user.room).emit('user-joined-call', socket.id);
         }
+    });
+
+    socket.on('offer', (data) => {
+        // Target user (specific dost) ko offer bhejo
+        io.to(data.target).emit('offer', { callerId: socket.id, offer: data.offer });
     });
 
     socket.on('answer', (data) => {
-        const user = users[socket.id];
-        if (user) {
-            socket.to(user.room).emit('answer', data);
-        }
+        io.to(data.target).emit('answer', { answererId: socket.id, answer: data.answer });
     });
 
     socket.on('ice-candidate', (data) => {
-        const user = users[socket.id];
-        if (user) {
-            socket.to(user.room).emit('ice-candidate', data);
-        }
+        io.to(data.target).emit('ice-candidate', { senderId: socket.id, candidate: data.candidate });
     });
 
-    // 👇 YAHAN NAYA END-CALL LOGIC ADD KIYA HAI 👇
     socket.on('end-call', () => {
         const user = users[socket.id];
         if (user) {
-            socket.to(user.room).emit('end-call');
+            socket.to(user.room).emit('user-left-call', socket.id);
         }
     });
-    // 👆 ===================================== 👆
+    // ==================================================
 
     // === NORMAL CHAT & IMAGE LOGIC ===
     socket.on('chatMessage', (msg) => {
@@ -104,6 +102,7 @@ io.on('connection', (socket) => {
         const user = users[socket.id];
         if (user) {
             io.to(user.room).emit('message', { user: 'System', text: `${user.username} has left.` });
+            socket.to(user.room).emit('user-left-call', socket.id); // Call se bhi hata do
             delete users[socket.id];
 
             io.to(user.room).emit('roomUsers', {

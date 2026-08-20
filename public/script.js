@@ -175,118 +175,201 @@ socket.on('stopTyping', () => {
 });
 
 // =======================================================
-// === VIDEO CALL LOGIC (WHATSAPP STYLE SHOW/HIDE) ===
+// === GROUP VIDEO CALL & CAMERA CONTROLS (PRO LEVEL) ===
 // =======================================================
 let localStream;
-let peerConnection;
+let peers = {}; // Saare doston ke connections yahan save honge
+let currentFacingMode = "user"; // "user" (front) ya "environment" (back)
 const servers = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
 
 const videoContainer = document.getElementById('video-container');
+const videoGrid = document.getElementById('video-grid');
 const localVideo = document.getElementById('localVideo');
-const remoteVideo = document.getElementById('remoteVideo');
 const callButton = document.getElementById('callButton');
 const endCallButton = document.getElementById('endCallButton');
+const toggleCamBtn = document.getElementById('toggleCamBtn');
+const flipCamBtn = document.getElementById('flipCamBtn');
 
-async function startCamera() {
-    if (!localStream) {
-        try {
-            localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-            localVideo.srcObject = localStream;
-        } catch (error) {
-            console.log("Camera access denied!", error);
-            alert("Please allow Camera & Mic permissions!");
-        }
+// 1. Camera Start Karna (Front ya Back)
+async function startCamera(facingMode = "user") {
+    if (localStream) return true;
+    try {
+        localStream = await navigator.mediaDevices.getUserMedia({ 
+            video: { facingMode: facingMode }, 
+            audio: true 
+        });
+        localVideo.srcObject = localStream;
+        return true;
+    } catch (error) {
+        console.log("Camera error!", error);
+        alert("Camera ya Mic ki permission nahi mili!");
+        return false;
     }
 }
 
-// 1. Call lagana (Jab upar se "Call" dabaye)
-callButton.onclick = async () => {
-    videoContainer.classList.remove('hidden'); // Video box dikhao
-    await startCamera(); 
-    if (!localStream) {
-        videoContainer.classList.add('hidden'); // Agar permission nahi di toh wapas chhupao
-        return; 
-    }
+// 2. Peer Connection Banana (Naye user ke liye)
+function createPeerConnection(userId) {
+    const pc = new RTCPeerConnection(servers);
+    localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
 
-    peerConnection = new RTCPeerConnection(servers);
-    localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
-
-    peerConnection.ontrack = (event) => {
-        remoteVideo.srcObject = event.streams[0];
+    // Jab uski video aaye, naya dabba banakar grid mein daalo
+    pc.ontrack = (event) => {
+        let remoteVid = document.getElementById(`video-${userId}`);
+        if(!remoteVid) {
+            remoteVid = document.createElement('video');
+            remoteVid.id = `video-${userId}`;
+            remoteVid.autoplay = true;
+            remoteVid.style.width = "150px";
+            remoteVid.style.border = "2px solid #f44336";
+            remoteVid.style.borderRadius = "8px";
+            videoGrid.appendChild(remoteVid);
+        }
+        remoteVid.srcObject = event.streams[0];
     };
 
-    peerConnection.onicecandidate = (event) => {
+    pc.onicecandidate = (event) => {
         if (event.candidate) {
-            socket.emit('ice-candidate', event.candidate);
+            socket.emit('ice-candidate', { target: userId, candidate: event.candidate });
         }
     };
+    return pc;
+}
 
-    const offer = await peerConnection.createOffer();
-    await peerConnection.setLocalDescription(offer);
-    socket.emit('offer', offer);
+// 3. Call Start Karna
+callButton.onclick = async () => {
+    videoContainer.classList.remove('hidden');
+    videoContainer.style.display = 'flex'; // UI theek karne ke liye
+    const success = await startCamera(currentFacingMode);
+    if (!success) {
+        videoContainer.classList.add('hidden');
+        return;
+    }
+    socket.emit('join-call'); 
 };
 
-// 2. Call Receive karna (Jab offer aaye)
-socket.on('offer', async (offer) => {
-    if(confirm("📞 Room mein Video Call aa rahi hai. Kya aap uthana chahte hain?")) {
-        videoContainer.classList.remove('hidden'); // Video box dikhao
-        await startCamera();
-        if (!localStream) {
-            videoContainer.classList.add('hidden');
+// 4. Jab koi call join kare
+socket.on('user-joined-call', async (userId) => {
+    if(!localStream) return; 
+    
+    const pc = createPeerConnection(userId);
+    peers[userId] = pc;
+    
+    const offer = await pc.createOffer();
+    await pc.setLocalDescription(offer);
+    socket.emit('offer', { target: userId, offer: offer });
+});
+
+socket.on('offer', async (data) => {
+    if(!localStream) {
+        if(confirm("📞 Room mein Group Video Call chal rahi hai. Join karna hai?")) {
+            videoContainer.classList.remove('hidden');
+            videoContainer.style.display = 'flex';
+            const success = await startCamera(currentFacingMode);
+            if(!success) return;
+            socket.emit('join-call'); 
+        } else {
             return;
         }
-
-        peerConnection = new RTCPeerConnection(servers);
-        localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
-
-        peerConnection.ontrack = (event) => {
-            remoteVideo.srcObject = event.streams[0];
-        };
-
-        peerConnection.onicecandidate = (event) => {
-            if (event.candidate) {
-                socket.emit('ice-candidate', event.candidate);
-            }
-        };
-
-        await peerConnection.setRemoteDescription(offer);
-        const answer = await peerConnection.createAnswer();
-        await peerConnection.setLocalDescription(answer);
-        socket.emit('answer', answer);
     }
+
+    const pc = createPeerConnection(data.callerId);
+    peers[data.callerId] = pc;
+    await pc.setRemoteDescription(data.offer);
+    const answer = await pc.createAnswer();
+    await pc.setLocalDescription(answer);
+    socket.emit('answer', { target: data.callerId, answer: answer });
 });
 
-socket.on('answer', async (answer) => {
-    if (peerConnection) {
-        await peerConnection.setRemoteDescription(answer);
-    }
+socket.on('answer', async (data) => {
+    const pc = peers[data.answererId];
+    if (pc) await pc.setRemoteDescription(data.answer);
 });
 
-socket.on('ice-candidate', async (candidate) => {
-    if (peerConnection) {
-        await peerConnection.addIceCandidate(candidate);
-    }
+socket.on('ice-candidate', async (data) => {
+    const pc = peers[data.senderId];
+    if (pc) await pc.addIceCandidate(data.candidate);
 });
 
-// 3. Call Kaatna (End Call Logic)
+// --- NEW PRO FEATURES ---
+
+// A. Camera ON / OFF Toggle
+toggleCamBtn.onclick = () => {
+    if(localStream) {
+        const videoTrack = localStream.getVideoTracks()[0];
+        if(videoTrack) {
+            videoTrack.enabled = !videoTrack.enabled;
+            toggleCamBtn.innerText = videoTrack.enabled ? "📹 Cam Off" : "🚫 Cam On";
+            toggleCamBtn.style.color = videoTrack.enabled ? "" : "#f44336";
+        }
+    }
+};
+
+// B. Camera Flip (Front/Back)
+flipCamBtn.onclick = async () => {
+    if(!localStream) return;
+    
+    // Switch state
+    currentFacingMode = currentFacingMode === "user" ? "environment" : "user";
+    
+    // Purana video track roko
+    const oldVideoTrack = localStream.getVideoTracks()[0];
+    oldVideoTrack.stop();
+    localStream.removeTrack(oldVideoTrack);
+
+    try {
+        // Naya camera kholo
+        const newStream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: currentFacingMode },
+            audio: false // Aawaz same rahegi
+        });
+        const newVideoTrack = newStream.getVideoTracks()[0];
+        localStream.addTrack(newVideoTrack);
+        localVideo.srcObject = localStream;
+
+        // Sabhi doston ke screens par apni nayi video replace karo
+        for(let id in peers) {
+            const sender = peers[id].getSenders().find(s => s.track.kind === 'video');
+            if(sender) sender.replaceTrack(newVideoTrack);
+        }
+    } catch (error) {
+        console.log("Flip cam error", error);
+        alert("Peeche ka camera nahi mila ya support nahi kar raha!");
+    }
+};
+
+// C. Call End Karna & Clean Up
 function stopCall() {
     if (localStream) {
-        localStream.getTracks().forEach(track => track.stop()); // Camera/Mic poori tarah band
+        localStream.getTracks().forEach(track => track.stop());
         localStream = null;
     }
-    if (peerConnection) {
-        peerConnection.close();
-        peerConnection = null;
+    // Sabhi connections kaat do
+    for(let id in peers) {
+        peers[id].close();
     }
-    videoContainer.classList.add('hidden'); // Video box wapas chhupa do
+    peers = {}; 
+    
+    // Screen se doston ki videos hata do
+    document.querySelectorAll('[id^="video-"]').forEach(vid => {
+        if(vid.id !== "localVideo") vid.remove();
+    });
+    
+    videoContainer.classList.add('hidden');
+    videoContainer.style.display = 'none';
+    toggleCamBtn.innerText = "📹 Cam Off"; // Reset text
 }
 
 endCallButton.onclick = () => {
     stopCall();
-    socket.emit('end-call'); // Dusre ko bhi batao ki main call kaat raha hoon
+    socket.emit('end-call'); 
 };
 
-socket.on('end-call', () => {
-    stopCall();
-    alert("Samne wale ne call kaat di hai.");
+// Jab koi dost call se leave kare
+socket.on('user-left-call', (userId) => {
+    if(peers[userId]) {
+        peers[userId].close();
+        delete peers[userId];
+    }
+    const vid = document.getElementById(`video-${userId}`);
+    if(vid) vid.remove(); // Us dost ka dabba hatao
 });
