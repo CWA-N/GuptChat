@@ -17,7 +17,6 @@
   font-family: "JetBrains Mono", monospace;
 }
 
-/* FIX: Changed 100vh to 100dvh for mobile address bar fix */
 body {
   background-color: var(--bg-color);
   color: var(--text-main);
@@ -257,13 +256,12 @@ input[type="text"]:focus {
   border-radius: 25px;
   padding: 5px 10px;
 }
-/* === UNIQUE IMAGE ICON STYLING === */
 .icon-btn {
   background: transparent;
   border: 1px solid var(--border-color);
   width: 35px;
   height: 35px;
-  border-radius: 50%; /* Gol aakar */
+  border-radius: 50%;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -279,7 +277,6 @@ input[type="text"]:focus {
   transition: transform 0.3s ease;
 }
 
-/* Jab mouse upar jaye toh Neon Glow kare */
 .icon-btn:hover {
   border-color: var(--cyan);
   color: var(--cyan);
@@ -290,7 +287,7 @@ input[type="text"]:focus {
 }
 
 .icon-btn:hover svg {
-  transform: scale(1.15) rotate(-5deg); /* Thoda bada aur tilt ho jaye */
+  transform: scale(1.15) rotate(-5deg);
 }
 #chat-form input[type="text"] {
   flex: 1;
@@ -316,9 +313,6 @@ input[type="text"]:focus {
   flex-shrink: 0;
 }
 
-/* ========================================= */
-/* FIX: RESPONSIVE MEDIA QUERIES FOR MOBILE  */
-/* ========================================= */
 @media (max-width: 768px) {
   .screen {
     flex-direction: column;
@@ -330,7 +324,7 @@ input[type="text"]:focus {
     border-bottom: 1px solid var(--border-color);
     padding: 15px;
     height: auto;
-    flex-shrink: 0; /* Yeh line top header ko dabne nahi degi */
+    flex-shrink: 0;
   }
 
   .sidebar-header {
@@ -368,13 +362,12 @@ input[type="text"]:focus {
   }
 
   .chat-input-container {
-    padding: 10px; /* Mobile par input ka space adjust kiya gaya hai */
+    padding: 10px;
     flex-shrink: 0;
-    padding-bottom: env(safe-area-inset-bottom, 10px); /* For iPhones */
+    padding-bottom: env(safe-area-inset-bottom, 10px);
   }
 }
 
-/* === IMAGE PREVIEW MODAL STYLES === */
 .modal {
   position: fixed;
   z-index: 1000;
@@ -382,7 +375,7 @@ input[type="text"]:focus {
   top: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.85); /* Dark transparent background */
+  background-color: rgba(0, 0, 0, 0.85);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -415,7 +408,6 @@ input[type="text"]:focus {
   color: var(--cyan);
 }
 
-/* Make chat images look clickable */
 .message img {
   cursor: pointer;
   transition: 0.2s;
@@ -424,12 +416,11 @@ input[type="text"]:focus {
   opacity: 0.8;
 }
 
-/* === TYPING INDICATOR STYLES === */
 .typing-text {
   font-size: 0.75rem;
   color: var(--cyan);
   font-style: italic;
-  min-height: 15px; /* Taki text aane par box hile nahi */
+  min-height: 15px;
   margin-bottom: 8px;
   padding-left: 10px;
   animation: pulse 1.5s infinite;
@@ -444,4 +435,56 @@ input[type="text"]:focus {
     opacity: 1;
     text-shadow: 0 0 5px var(--cyan-glow);
   }
+}
+
+/* ==================================================== */
+/* === YAHAN SE VIDEO CALL KA NAYA STYLING ADD HUA ===  */
+/* ==================================================== */
+
+#video-container {
+  display: flex;
+  gap: 15px;
+  padding: 15px;
+  background-color: var(--panel-bg);
+  border-bottom: 1px solid var(--border-color);
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap; /* Mobile screen par theek se dikhane ke liye */
+}
+
+#video-container video {
+  width: 150px;
+  border: 2px solid var(--border-color);
+  border-radius: 8px;
+  background-color: #000;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+  transition: all 0.3s ease;
+}
+
+/* Aapki video green border ke sath */
+#localVideo {
+  border-color: #4CAF50 !important;
+}
+
+/* Dost ki video red border ke sath */
+#remoteVideo {
+  border-color: #f44336 !important;
+}
+
+#callButton {
+  padding: 10px 20px;
+  background-color: var(--cyan);
+  color: #000;
+  border: none;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 0 10px var(--cyan-glow);
+  transition: all 0.3s ease;
+}
+
+#callButton:hover {
+  background-color: #fff;
+  box-shadow: 0 0 20px var(--cyan);
+  transform: translateY(-2px); /* Hover karne par thoda upar uthega */
 }

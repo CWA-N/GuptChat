@@ -14,6 +14,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 const users = {};
 
 io.on('connection', (socket) => {
+    
+    // === ROOM JOIN LOGIC ===
     socket.on('joinRoom', ({ username, room }) => {
         socket.join(room);
         users[socket.id] = { username, room };
@@ -25,16 +27,41 @@ io.on('connection', (socket) => {
             room: room,
             users: Object.values(users).filter(u => u.room === room)
         });
-
-        // === VIDEO CALL SIGNALING ===
-        socket.on('offer', (offer) => socket.broadcast.emit('offer', offer));
-        socket.on('answer', (answer) => socket.broadcast.emit('answer', answer));
-        socket.on('ice-candidate', (candidate) => socket.broadcast.emit('ice-candidate', candidate));
     });
 
+    // === VIDEO CALL SIGNALING (Sirf Room Walon Ke Liye) ===
+    socket.on('offer', (data) => {
+        const user = users[socket.id];
+        if (user) {
+            // Signal sirf us user ke room mein jayega
+            socket.to(user.room).emit('offer', data); 
+        }
+    });
 
+    socket.on('answer', (data) => {
+        const user = users[socket.id];
+        if (user) {
+            socket.to(user.room).emit('answer', data);
+        }
+    });
 
+    socket.on('ice-candidate', (data) => {
+        const user = users[socket.id];
+        if (user) {
+            socket.to(user.room).emit('ice-candidate', data);
+        }
+    });
 
+    // 👇 YAHAN NAYA END-CALL LOGIC ADD KIYA HAI 👇
+    socket.on('end-call', () => {
+        const user = users[socket.id];
+        if (user) {
+            socket.to(user.room).emit('end-call');
+        }
+    });
+    // 👆 ===================================== 👆
+
+    // === NORMAL CHAT & IMAGE LOGIC ===
     socket.on('chatMessage', (msg) => {
         const user = users[socket.id];
         if (user) {
@@ -49,11 +76,10 @@ io.on('connection', (socket) => {
         }
     });
 
-    // === YAHAN SE TYPING INDICATOR CODE ===
+    // === TYPING INDICATOR CODE ===
     socket.on('typing', () => {
         const user = users[socket.id];
         if (user) {
-            // Jo type kar raha hai usko chhodkar, room ke baaki sabko bhejo
             socket.broadcast.to(user.room).emit('typing', user.username);
         }
     });
@@ -64,18 +90,16 @@ io.on('connection', (socket) => {
             socket.broadcast.to(user.room).emit('stopTyping');
         }
     });
-    // === YAHAN TAK ===
 
-    // === YAHAN HAI GLOBAL CLEAR CHAT KA ASLI CODE ===
+    // === CLEAR CHAT CODE ===
     socket.on('clearRoomChat', () => {
         const user = users[socket.id];
         if (user) {
-            // Ye line room ke sabhi members ko signal bhejti hai
             io.to(user.room).emit('chatCleared');
         }
     });
-    // ===============================================
 
+    // === DISCONNECT LOGIC ===
     socket.on('disconnect', () => {
         const user = users[socket.id];
         if (user) {
@@ -90,12 +114,10 @@ io.on('connection', (socket) => {
     });
 });
 
-
+// === AUTO CLEAR CHAT EVERY 2 MINUTES (120,000 ms) ===
 setInterval(() => {
-
     io.emit('chatCleared');
 }, 120000);
-
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
