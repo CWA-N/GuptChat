@@ -29,6 +29,15 @@
         </div>
     </div>
 
+    <!-- Video Call Section -->
+    <div id="video-container" style="display: flex; gap: 10px; margin-bottom: 10px;">
+        <!-- Aapki video (muted taaki aapko apni aawaz double na sune) -->
+        <video id="localVideo" autoplay muted style="width: 200px; border: 2px solid green;"></video>
+
+        <!-- Dost ki video -->
+        <video id="remoteVideo" autoplay style="width: 200px; border: 2px solid red;"></video>
+    </div>
+    <button id="callButton" style="padding: 10px; background: blue; color: white;">Start Video Call</button>
     <!-- CHAT SCREEN -->
     <div id="chat-screen" class="screen hidden">
         <aside class="sidebar">

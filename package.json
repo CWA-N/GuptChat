@@ -1,10 +1,11 @@
 {
   "name": "guptchat",
   "version": "1.0.0",
-  "description": "",
+  "description": "��#\u0000 \u0000G\u0000u\u0000p\u0000t\u0000C\u0000h\u0000a\u0000t\u0000\r\u0000 \u0000#\u0000 \u0000G\u0000u\u0000p\u0000t\u0000C\u0000h\u0000a\u0000t\u0000\r\u0000 \u0000",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
   },
   "keywords": [],
   "author": "",
@@ -13,5 +14,13 @@
   "dependencies": {
     "express": "^5.2.1",
     "socket.io": "^4.8.3"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CWA-N/GuptChat.git"
+  },
+  "bugs": {
+    "url": "https://github.com/CWA-N/GuptChat/issues"
+  },
+  "homepage": "https://github.com/CWA-N/GuptChat#readme"
 }

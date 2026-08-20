@@ -21,25 +21,25 @@ const sidebarContent = document.getElementById('sidebar-content');
 
 // === Naye Variables Typing ke liye ===
 const typingIndicator = document.getElementById('typing-indicator');
-let typingTimeout; 
+let typingTimeout;
 // ====================================
 
 let currentUsername = '';
-let currentRoom = ''; 
+let currentRoom = '';
 
 joinForm.addEventListener('submit', (e) => {
     e.preventDefault();
     currentUsername = usernameInput.value.trim();
-    currentRoom = roomInput.value.trim(); 
+    currentRoom = roomInput.value.trim();
 
     if (currentUsername && currentRoom) {
         socket.emit('joinRoom', { username: currentUsername, room: currentRoom });
         roomNameDisplays.forEach(el => el.innerText = currentRoom);
         currentUsernameDisplay.innerText = currentUsername;
-        
+
         loginScreen.classList.add('hidden');
         chatScreen.classList.remove('hidden');
-        document.body.style.backgroundImage = 'none'; 
+        document.body.style.backgroundImage = 'none';
     }
 });
 
@@ -62,12 +62,12 @@ chatForm.addEventListener('submit', (e) => {
     e.preventDefault();
     const msg = msgInput.value.trim();
     if (!msg) return;
-    
+
     socket.emit('chatMessage', msg);
-    
+
     // Nayi line: Message bhejne ke baad typing hide karne ke liye
-    socket.emit('stopTyping'); 
-    
+    socket.emit('stopTyping');
+
     msgInput.value = '';
     msgInput.focus();
 });
@@ -79,7 +79,7 @@ imageInput.addEventListener('change', function () {
     if (file) {
         if (file.size > 15 * 1024 * 1024) {
             alert("File is too large! Please select an image smaller than 15MB.");
-            this.value = ''; 
+            this.value = '';
             return;
         }
 
@@ -141,8 +141,8 @@ const closeModal = document.querySelector('.close-modal');
 
 chatMessages.addEventListener('click', (e) => {
     if (e.target.tagName === 'IMG') {
-        modalImg.src = e.target.src; 
-        imageModal.classList.remove('hidden'); 
+        modalImg.src = e.target.src;
+        imageModal.classList.remove('hidden');
     }
 });
 
@@ -162,10 +162,10 @@ imageModal.addEventListener('click', (e) => {
 msgInput.addEventListener('input', () => {
     socket.emit('typing');
     clearTimeout(typingTimeout);
-    
+
     typingTimeout = setTimeout(() => {
         socket.emit('stopTyping');
-    }, 1500); 
+    }, 1500);
 });
 
 socket.on('typing', (username) => {
@@ -176,3 +176,84 @@ socket.on('stopTyping', () => {
     typingIndicator.innerText = '';
 });
 // ==================================================
+
+
+
+// === VIDEO CALL LOGIC ===
+let localStream;
+let peerConnection;
+// Google ka free server jo internet par devices ko dhundhta hai
+const servers = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
+
+const localVideo = document.getElementById('localVideo');
+const remoteVideo = document.getElementById('remoteVideo');
+const callButton = document.getElementById('callButton');
+
+// 1. Camera aur Mic on karna
+async function startCamera() {
+    try {
+        localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+        localVideo.srcObject = localStream;
+    } catch (error) {
+        console.log("Camera access denied!", error);
+    }
+}
+startCamera(); // Page load hote hi camera on ho jayega
+
+// 2. Call lagana (Jab button dabayein)
+callButton.onclick = async () => {
+    peerConnection = new RTCPeerConnection(servers);
+
+    // Apni video/audio stream call mein daalna
+    localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+
+    // Jab samne wale ki video aaye, toh use screen par dikhana
+    peerConnection.ontrack = (event) => {
+        remoteVideo.srcObject = event.streams[0];
+    };
+
+    // Network rasta (ICE candidate) dhoondhna aur bhejna
+    peerConnection.onicecandidate = (event) => {
+        if (event.candidate) {
+            socket.emit('ice-candidate', event.candidate);
+        }
+    };
+
+    // Call ka offer banana aur bhejna
+    const offer = await peerConnection.createOffer();
+    await peerConnection.setLocalDescription(offer);
+    socket.emit('offer', offer);
+};
+
+// 3. Call Receive karna (Jab offer aaye)
+socket.on('offer', async (offer) => {
+    peerConnection = new RTCPeerConnection(servers);
+    localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+
+    peerConnection.ontrack = (event) => {
+        remoteVideo.srcObject = event.streams[0];
+    };
+
+    peerConnection.onicecandidate = (event) => {
+        if (event.candidate) {
+            socket.emit('ice-candidate', event.candidate);
+        }
+    };
+
+    // Offer accept karke apna Answer bhejna
+    await peerConnection.setRemoteDescription(offer);
+    const answer = await peerConnection.createAnswer();
+    await peerConnection.setLocalDescription(answer);
+    socket.emit('answer', answer);
+});
+
+// 4. Answer aur Network Info set karna
+socket.on('answer', async (answer) => {
+    await peerConnection.setRemoteDescription(answer);
+});
+
+socket.on('ice-candidate', async (candidate) => {
+    if (peerConnection) {
+        await peerConnection.addIceCandidate(candidate);
+    }
+});
