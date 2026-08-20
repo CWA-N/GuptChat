@@ -1,120 +1,218 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GuptChat Messenger - Free Group Video Call & Chat</title>
+    <meta
+      name="description"
+      content="GuptChat is a secure, real-time private chatting and group video calling application. Join custom rooms and chat safely with friends."
+    />
+    <meta
+      name="keywords"
+      content="GuptChat, private chat, real-time chat app, group video call, secure messaging, WebRTC chat"
+    />
+    <meta name="author" content="Code With Aasif" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GuptChat Messenger</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-
-<body>
-
+  <body>
     <!-- LOGIN SCREEN -->
     <div id="login-screen" class="screen">
-        <div class="login-box">
-            <h1>[<span>Gupt</span>Chat]</h1>
-            <p class="subtitle">Enter a shared IP address to join</p>
-            <form id="join-form">
-                <div class="form-group">
-                    <label>USERNAME</label>
-                    <input type="text" id="username" placeholder="e.g. alice" required autocomplete="off">
-                </div>
-                <div class="form-group">
-                    <label>IP ADDRESS (ROOM CODE)</label>
-                    <input type="text" id="room" placeholder="e.g. 192.168.1.1" required autocomplete="off">
-                </div>
-                <button type="submit" class="btn">CONNECT &rarr;</button>
-            </form>
-        </div>
+      <div class="login-box">
+        <h1>[<span>Gupt</span>Chat]</h1>
+        <p class="subtitle">Enter a shared IP address to join</p>
+        <form id="join-form">
+          <div class="form-group">
+            <label>USERNAME</label>
+            <input
+              type="text"
+              id="username"
+              placeholder="e.g. alice"
+              required
+              autocomplete="off"
+            />
+          </div>
+          <div class="form-group">
+            <label>IP ADDRESS (ROOM CODE)</label>
+            <input
+              type="text"
+              id="room"
+              placeholder="e.g. 192.168.1.1"
+              required
+              autocomplete="off"
+            />
+          </div>
+          <button type="submit" class="btn">CONNECT &rarr;</button>
+        </form>
+      </div>
     </div>
 
     <!-- CHAT SCREEN -->
     <div id="chat-screen" class="screen hidden">
-        <aside class="sidebar">
-            <div class="sidebar-header">
-                <h2 class="logo">[<span>Gupt</span>Chat]</h2>
-                <button id="mobile-toggle" class="mobile-only btn-outline">Menu</button>
-            </div>
+      <aside class="sidebar">
+        <div class="sidebar-header">
+          <h2 class="logo">[<span>Gupt</span>Chat]</h2>
+          <button id="mobile-toggle" class="mobile-only btn-outline">
+            Menu
+          </button>
+        </div>
 
-            <div class="sidebar-content" id="sidebar-content">
-                <div class="panel room-info">
-                    <h3>ROOM</h3>
-                    <p id="room-name" class="highlight">8080</p>
-                    <p class="online-count"><span class="dot"></span> <span id="user-count">1</span> online</p>
-                </div>
-                <div class="panel members">
-                    <h3>MEMBERS</h3>
-                    <ul id="users-list"></ul>
-                </div>
-                <button id="leave-btn" class="btn-outline">&larr; Leave Room</button>
-            </div>
-        </aside>
+        <div class="sidebar-content" id="sidebar-content">
+          <div class="panel room-info">
+            <h3>ROOM</h3>
+            <p id="room-name" class="highlight">8080</p>
+            <p class="online-count">
+              <span class="dot"></span> <span id="user-count">1</span> online
+            </p>
+          </div>
+          <div class="panel members">
+            <h3>MEMBERS</h3>
+            <ul id="users-list"></ul>
+          </div>
+          <button id="leave-btn" class="btn-outline">&larr; Leave Room</button>
+        </div>
+      </aside>
 
-        <main class="chat-main">
-            <header class="chat-header">
-                <div>ROOM // <span id="header-room-name" class="highlight">8080</span></div>
-                <div class="header-actions">
-                    <!-- Naya Call Button upar Header mein -->
-                    <button id="callButton" class="btn-outline small-btn"><img src="video.png" alt="logo" width="30" height="20"></button>
-                    
-                    <button id="clear-chat-btn" class="btn-outline small-btn">🗑️ Clear</button>
-                    <!-- <span id="current-username" class="user-badge">user</span> -->
-                </div>
-            </header>
+      <main class="chat-main">
+        <header class="chat-header">
+          <div>
+            ROOM // <span id="header-room-name" class="highlight">8080</span>
+          </div>
+          <div class="header-actions">
+            <!-- Naya Call Button upar Header mein -->
+            <button id="callButton" class="btn-outline small-btn">
+              <img src="video.png" alt="logo" width="30" height="20" />
+            </button>
 
-            <!-- === VIDEO CALL SECTION (Group & Controls) === -->
-            <div id="video-container" class="hidden" style="flex-direction: column; background: rgba(0,0,0,0.5); padding: 15px; border-bottom: 1px solid #333;">
-                
-                <!-- Group Videos yahan dikhenge -->
-                <div id="video-grid" style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-bottom: 10px;">
-                    <video id="localVideo" autoplay muted style="width: 150px; border: 2px solid #4CAF50; border-radius: 8px;"></video>
-                    <!-- Baaki doston ke videos yahan automatic add honge -->
-                </div>
-                
-                <!-- Naye Camera Controls -->
-                <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
-                    
-                    <!-- 👇 Naya Mute Button Yahan Add Kiya Hai 👇 -->
-                    <button id="toggleMicBtn" class="btn-outline small-btn">🎙️ Mute</button>
-                    
-                    <button id="toggleCamBtn" class="btn-outline small-btn">📹 Cam Off</button>
-                    <button id="flipCamBtn" class="btn-outline small-btn" style="color: #00f0ff; border-color: #00f0ff;">🔄 Flip Cam</button>
-                    <button id="endCallButton" class="btn" style="background: #f44336; color: white; padding: 8px 15px;">End Call</button>
-                </div>
-            </div>
-            <!-- ============================================================= -->
+            <button id="clear-chat-btn" class="btn-outline small-btn">
+              🗑️ Clear
+            </button>
+            <!-- <span id="current-username" class="user-badge">user</span> -->
+          </div>
+        </header>
 
-            <div class="chat-messages" id="chat-messages">
-                <div class="system-msg">- Start of conversation -</div>
-            </div>
+        <!-- === VIDEO CALL SECTION (Group & Controls) === -->
+        <div
+          id="video-container"
+          class="hidden"
+          style="
+            flex-direction: column;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 15px;
+            border-bottom: 1px solid #333;
+          "
+        >
+          <!-- Group Videos yahan dikhenge -->
+          <div
+            id="video-grid"
+            style="
+              display: flex;
+              gap: 10px;
+              flex-wrap: wrap;
+              justify-content: center;
+              margin-bottom: 10px;
+            "
+          >
+            <video
+              id="localVideo"
+              autoplay
+              muted
+              style="
+                width: 150px;
+                border: 2px solid #4caf50;
+                border-radius: 8px;
+              "
+            ></video>
+            <!-- Baaki doston ke videos yahan automatic add honge -->
+          </div>
 
-            <div class="chat-input-container">
-                <div id="typing-indicator" class="typing-text"></div>
-                <form id="chat-form">
-                    <input type="file" id="image-input" accept="image/*" class="hidden">
-                    <button type="button" id="img-btn" class="icon-btn" title="Send Image">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                            stroke-linecap="round" stroke-linejoin="round">
-                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                            <circle cx="8.5" cy="8.5" r="1.5"></circle>
-                            <polyline points="21 15 16 10 5 21"></polyline>
-                        </svg>
-                    </button>
-                    <input type="text" id="msg" placeholder="Type a message..." autocomplete="off">
-                    <button type="submit" class="send-btn">&#10148;</button>
-                </form>
-            </div>
-        </main>
+          <!-- Naye Camera Controls -->
+          <div
+            style="
+              display: flex;
+              gap: 10px;
+              justify-content: center;
+              flex-wrap: wrap;
+            "
+          >
+            <!-- 👇 Naya Mute Button Yahan Add Kiya Hai 👇 -->
+            <button id="toggleMicBtn" class="btn-outline small-btn">
+              🎙️ Mute
+            </button>
+
+            <button id="toggleCamBtn" class="btn-outline small-btn">
+              📹 Cam Off
+            </button>
+            <button
+              id="flipCamBtn"
+              class="btn-outline small-btn"
+              style="color: #00f0ff; border-color: #00f0ff"
+            >
+              🔄 Flip Cam
+            </button>
+            <button
+              id="endCallButton"
+              class="btn"
+              style="background: #f44336; color: white; padding: 8px 15px"
+            >
+              End Call
+            </button>
+          </div>
+        </div>
+        <!-- ============================================================= -->
+
+        <div class="chat-messages" id="chat-messages">
+          <div class="system-msg">- Start of conversation -</div>
+        </div>
+
+        <div class="chat-input-container">
+          <div id="typing-indicator" class="typing-text"></div>
+          <form id="chat-form">
+            <input
+              type="file"
+              id="image-input"
+              accept="image/*"
+              class="hidden"
+            />
+            <button
+              type="button"
+              id="img-btn"
+              class="icon-btn"
+              title="Send Image"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                <polyline points="21 15 16 10 5 21"></polyline>
+              </svg>
+            </button>
+            <input
+              type="text"
+              id="msg"
+              placeholder="Type a message..."
+              autocomplete="off"
+            />
+            <button type="submit" class="send-btn">&#10148;</button>
+          </form>
+        </div>
+      </main>
     </div>
 
     <!-- === IMAGE PREVIEW MODAL === -->
     <div id="image-modal" class="modal hidden">
-        <span class="close-modal">&times;</span>
-        <img class="modal-content" id="modal-img">
+      <span class="close-modal">&times;</span>
+      <img class="modal-content" id="modal-img" />
     </div>
 
     <script src="/socket.io/socket.io.js"></script>
     <script src="script.js"></script>
-</body>
+  </body>
 </html>
