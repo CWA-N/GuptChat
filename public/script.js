@@ -8,7 +8,7 @@ const roomInput = document.getElementById('room');
 const roomNameDisplays = document.querySelectorAll('#room-name, #header-room-name');
 const userCountDisplay = document.getElementById('user-count');
 const usersList = document.getElementById('users-list');
-const currentUsernameDisplay = document.getElementById('current-username');
+// const currentUsernameDisplay = document.getElementById('current-username');
 const chatForm = document.getElementById('chat-form');
 const msgInput = document.getElementById('msg');
 const chatMessages = document.getElementById('chat-messages');
@@ -35,7 +35,7 @@ joinForm.addEventListener('submit', (e) => {
     if (currentUsername && currentRoom) {
         socket.emit('joinRoom', { username: currentUsername, room: currentRoom });
         roomNameDisplays.forEach(el => el.innerText = currentRoom);
-        currentUsernameDisplay.innerText = currentUsername;
+        // currentUsernameDisplay.innerText = currentUsername;
 
         loginScreen.classList.add('hidden');
         chatScreen.classList.remove('hidden');
