@@ -8,7 +8,7 @@ const roomInput = document.getElementById('room');
 const roomNameDisplays = document.querySelectorAll('#room-name, #header-room-name');
 const userCountDisplay = document.getElementById('user-count');
 const usersList = document.getElementById('users-list');
-// const currentUsernameDisplay = document.getElementById('current-username');
+// const currentUsernameDisplay = document.getElementById('current-username'); // Ise comment hi rehne diya hai
 const chatForm = document.getElementById('chat-form');
 const msgInput = document.getElementById('msg');
 const chatMessages = document.getElementById('chat-messages');
@@ -35,7 +35,7 @@ joinForm.addEventListener('submit', (e) => {
     if (currentUsername && currentRoom) {
         socket.emit('joinRoom', { username: currentUsername, room: currentRoom });
         roomNameDisplays.forEach(el => el.innerText = currentRoom);
-        // currentUsernameDisplay.innerText = currentUsername;
+        // currentUsernameDisplay.innerText = currentUsername; // Ise bhi comment rehne diya
 
         loginScreen.classList.add('hidden');
         chatScreen.classList.remove('hidden');
@@ -340,23 +340,30 @@ flipCamBtn.onclick = async () => {
 // C. Call End Karna & Clean Up
 function stopCall() {
     if (localStream) {
-        localStream.getTracks().forEach(track => track.stop());
+        localStream.getTracks().forEach(track => track.stop()); // Camera/Mic poori tarah band
         localStream = null;
     }
+    
     // Sabhi connections kaat do
     for(let id in peers) {
         peers[id].close();
     }
     peers = {}; 
     
-    // Screen se doston ki videos hata do
-    document.querySelectorAll('[id^="video-"]').forEach(vid => {
-        if(vid.id !== "localVideo") vid.remove();
+    // 👇 YAHAN FIX ADD KIYA HAI: Sirf video tags hatenge 👇
+    document.querySelectorAll('video[id^="video-"]').forEach(vid => {
+        if(vid.id !== "localVideo") vid.remove(); 
     });
+    // 👆 ================================================== 👆
+
+    localVideo.srcObject = null; // Purani image freeze hone se rokne ke liye
     
     videoContainer.classList.add('hidden');
     videoContainer.style.display = 'none';
-    toggleCamBtn.innerText = "📹 Cam Off"; // Reset text
+    
+    // Button styles reset
+    toggleCamBtn.innerText = "📹 Cam Off"; 
+    toggleCamBtn.style.color = ""; 
 }
 
 endCallButton.onclick = () => {
