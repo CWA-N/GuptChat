@@ -189,7 +189,6 @@ const callButton = document.getElementById('callButton');
 const endCallButton = document.getElementById('endCallButton');
 const toggleCamBtn = document.getElementById('toggleCamBtn');
 const flipCamBtn = document.getElementById('flipCamBtn');
-// 👇 MUTE BUTTON ADD KIYA YAHAN 👇
 const toggleMicBtn = document.getElementById('toggleMicBtn');
 
 // 1. Camera Start Karna (Front ya Back)
@@ -201,6 +200,15 @@ async function startCamera(facingMode = "user") {
             audio: true 
         });
         localVideo.srcObject = localStream;
+        
+        // 👇 YAHAN MIRROR EFFECT ADD KIYA HAI 👇
+        if (facingMode === "user") {
+            localVideo.style.transform = "scaleX(-1)"; // Front cam ko aaine ki tarah palat do
+        } else {
+            localVideo.style.transform = "none"; // Back cam ko normal rakho
+        }
+        // 👆 ================================== 👆
+
         return true;
     } catch (error) {
         console.log("Camera error!", error);
@@ -294,7 +302,7 @@ socket.on('ice-candidate', async (data) => {
 
 // --- NEW PRO FEATURES ---
 
-// 👇 MUTE / UNMUTE LOGIC ADD KIYA 👇
+// MUTE / UNMUTE LOGIC
 toggleMicBtn.onclick = () => {
     if(localStream) {
         const audioTrack = localStream.getAudioTracks()[0];
@@ -306,7 +314,7 @@ toggleMicBtn.onclick = () => {
     }
 };
 
-// A. Camera ON / OFF Toggle
+// Camera ON / OFF Toggle
 toggleCamBtn.onclick = () => {
     if(localStream) {
         const videoTrack = localStream.getVideoTracks()[0];
@@ -318,13 +326,21 @@ toggleCamBtn.onclick = () => {
     }
 };
 
-// B. Camera Flip (Front/Back)
+// Camera Flip (Front/Back)
 flipCamBtn.onclick = async () => {
     if(!localStream) return;
     
     // Switch state
     currentFacingMode = currentFacingMode === "user" ? "environment" : "user";
     
+    // 👇 YAHAN BHI MIRROR EFFECT UPDATE KIYA HAI 👇
+    if (currentFacingMode === "user") {
+        localVideo.style.transform = "scaleX(-1)";
+    } else {
+        localVideo.style.transform = "none";
+    }
+    // 👆 ======================================= 👆
+
     // Purana video track roko
     const oldVideoTrack = localStream.getVideoTracks()[0];
     oldVideoTrack.stop();
@@ -351,7 +367,7 @@ flipCamBtn.onclick = async () => {
     }
 };
 
-// C. Call End Karna & Clean Up
+// Call End Karna & Clean Up
 function stopCall() {
     if (localStream) {
         localStream.getTracks().forEach(track => track.stop()); // Camera/Mic poori tarah band
@@ -370,6 +386,7 @@ function stopCall() {
     });
 
     localVideo.srcObject = null; // Purani image freeze hone se rokne ke liye
+    localVideo.style.transform = "none"; // Scale reset
     
     videoContainer.classList.add('hidden');
     videoContainer.style.display = 'none';
@@ -378,7 +395,6 @@ function stopCall() {
     toggleCamBtn.innerText = "📹 Cam Off"; 
     toggleCamBtn.style.color = ""; 
     
-    // 👇 MUTE BUTTON KO BHI RESET KIYA YAHAN 👇
     toggleMicBtn.innerText = "🎙️ Mute"; 
     toggleMicBtn.style.color = ""; 
 }
