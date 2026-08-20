@@ -189,6 +189,8 @@ const callButton = document.getElementById('callButton');
 const endCallButton = document.getElementById('endCallButton');
 const toggleCamBtn = document.getElementById('toggleCamBtn');
 const flipCamBtn = document.getElementById('flipCamBtn');
+// 👇 MUTE BUTTON ADD KIYA YAHAN 👇
+const toggleMicBtn = document.getElementById('toggleMicBtn');
 
 // 1. Camera Start Karna (Front ya Back)
 async function startCamera(facingMode = "user") {
@@ -292,6 +294,18 @@ socket.on('ice-candidate', async (data) => {
 
 // --- NEW PRO FEATURES ---
 
+// 👇 MUTE / UNMUTE LOGIC ADD KIYA 👇
+toggleMicBtn.onclick = () => {
+    if(localStream) {
+        const audioTrack = localStream.getAudioTracks()[0];
+        if(audioTrack) {
+            audioTrack.enabled = !audioTrack.enabled;
+            toggleMicBtn.innerText = audioTrack.enabled ? "🎙️ Mute" : "🔇 Unmute";
+            toggleMicBtn.style.color = audioTrack.enabled ? "" : "#f44336";
+        }
+    }
+};
+
 // A. Camera ON / OFF Toggle
 toggleCamBtn.onclick = () => {
     if(localStream) {
@@ -350,11 +364,10 @@ function stopCall() {
     }
     peers = {}; 
     
-    // 👇 YAHAN FIX ADD KIYA HAI: Sirf video tags hatenge 👇
+    // Sirf video tags hatenge
     document.querySelectorAll('video[id^="video-"]').forEach(vid => {
         if(vid.id !== "localVideo") vid.remove(); 
     });
-    // 👆 ================================================== 👆
 
     localVideo.srcObject = null; // Purani image freeze hone se rokne ke liye
     
@@ -364,6 +377,10 @@ function stopCall() {
     // Button styles reset
     toggleCamBtn.innerText = "📹 Cam Off"; 
     toggleCamBtn.style.color = ""; 
+    
+    // 👇 MUTE BUTTON KO BHI RESET KIYA YAHAN 👇
+    toggleMicBtn.innerText = "🎙️ Mute"; 
+    toggleMicBtn.style.color = ""; 
 }
 
 endCallButton.onclick = () => {
