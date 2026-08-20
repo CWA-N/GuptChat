@@ -472,7 +472,7 @@ input[type="text"]:focus {
 }
 
 #callButton {
-  padding: 10px 20px;
+  padding-top: 10px;
   background-color: var(--cyan);
   color: #000;
   border: none;
@@ -484,7 +484,8 @@ input[type="text"]:focus {
 }
 
 #callButton:hover {
-  background-color: #fff;
+  background-color: #fffdfd;
+  color: var(--cyan);
   box-shadow: 0 0 20px var(--cyan);
   transform: translateY(-2px); /* Hover karne par thoda upar uthega */
 }
